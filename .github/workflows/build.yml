@@ -1,8 +1,13 @@
 ---
 name: Build
+run-name: ${{ inputs.id != 0 && format('Build - {0}', inputs.id) || 'Build' }}
 
 on:
   workflow_dispatch:
+    inputs:
+      id:
+        description: "AUTOMATION ONLY - Do not fill out"
+        required: false
   push:
     branches:
       - "main"
