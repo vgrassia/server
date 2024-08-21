@@ -1,6 +1,6 @@
 ---
 name: Build
-run-name: ${{ inputs.id != 0 && format('Build - {0}', inputs.id) || 'Build' }}
+run-name: ${{ inputs.id || 'Build' }}
 
 on:
   workflow_dispatch:
