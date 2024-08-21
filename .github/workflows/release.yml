@@ -1,19 +1,9 @@
 ---
 name: Release
-run-name: Release ${{ inputs.release_type }}
+run-name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      release_type:
-        description: "Release Options"
-        required: true
-        default: "Initial Release"
-        type: choice
-        options:
-          - Initial Release
-          - Redeploy
-          - Dry Run
 
 env:
   _AZ_REGISTRY: "bitwardenprod.azurecr.io"
@@ -26,15 +16,14 @@ jobs:
       release_version: ${{ steps.version.outputs.version }}
       branch-name: ${{ steps.branch.outputs.branch-name }}
     steps:
-      - name: Branch check
-        if: ${{ inputs.release_type != 'Dry Run' }}
-        run: |
-          if [[ "$GITHUB_REF" != "refs/heads/rc" ]] && [[ "$GITHUB_REF" != "refs/heads/hotfix-rc" ]]; then
-            echo "==================================="
-            echo "[!] Can only release from the 'rc' or 'hotfix-rc' branches"
-            echo "==================================="
-            exit 1
-          fi
+      # - name: Branch check
+      #   run: |
+      #     if [[ "$GITHUB_REF" != "refs/heads/rc" ]] && [[ "$GITHUB_REF" != "refs/heads/hotfix-rc" ]]; then
+      #       echo "==================================="
+      #       echo "[!] Can only release from the 'rc' or 'hotfix-rc' branches"
+      #       echo "==================================="
+      #       exit 1
+      #     fi
 
       - name: Check out repo
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -43,7 +32,7 @@ jobs:
         id: version
         uses: bitwarden/gh-actions/release-version-check@main
         with:
-          release-type: ${{ inputs.release_type }}
+          release-type: Initial Release
           project-type: dotnet
           file: Directory.Build.props
 
@@ -82,14 +71,11 @@ jobs:
           - project_name: Sso
     steps:
       - name: Print environment
-        env:
-          RELEASE_OPTION: ${{ inputs.release_type }}
         run: |
           whoami
           docker --version
           echo "GitHub ref: $GITHUB_REF"
           echo "GitHub event: $GITHUB_EVENT"
-          echo "Github Release Option: $RELEASE_OPTION"
 
       - name: Check out repo
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -114,34 +100,21 @@ jobs:
       - name: Pull latest project image
         env:
           PROJECT_NAME: ${{ steps.setup.outputs.project_name }}
-        run: |
-          if [[ "${{ inputs.release_type }}" == "Dry Run" ]]; then
-            docker pull $_AZ_REGISTRY/$PROJECT_NAME:latest
-          else
-            docker pull $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME
-          fi
+        run: docker pull $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME
 
       - name: Tag version and latest
         env:
           PROJECT_NAME: ${{ steps.setup.outputs.project_name }}
         run: |
-          if [[ "${{ inputs.release_type }}" == "Dry Run" ]]; then
-            docker tag $_AZ_REGISTRY/$PROJECT_NAME:latest $_AZ_REGISTRY/$PROJECT_NAME:dryrun
-          else
-            docker tag $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME $_AZ_REGISTRY/$PROJECT_NAME:$_RELEASE_VERSION
-            docker tag $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME $_AZ_REGISTRY/$PROJECT_NAME:latest
-          fi
+          docker tag $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME $_AZ_REGISTRY/$PROJECT_NAME:$_RELEASE_VERSION
+          docker tag $_AZ_REGISTRY/$PROJECT_NAME:$_BRANCH_NAME $_AZ_REGISTRY/$PROJECT_NAME:latest
 
       - name: Push version and latest image
         env:
           PROJECT_NAME: ${{ steps.setup.outputs.project_name }}
         run: |
-          if [[ "${{ inputs.release_type }}" == "Dry Run" ]]; then
-            docker push $_AZ_REGISTRY/$PROJECT_NAME:dryrun
-          else
-            docker push $_AZ_REGISTRY/$PROJECT_NAME:$_RELEASE_VERSION
-            docker push $_AZ_REGISTRY/$PROJECT_NAME:latest
-          fi
+          docker push $_AZ_REGISTRY/$PROJECT_NAME:$_RELEASE_VERSION
+          docker push $_AZ_REGISTRY/$PROJECT_NAME:latest
 
       - name: Log out of Docker
         run: docker logout
@@ -152,7 +125,6 @@ jobs:
     needs: setup
     steps:
       - name: Download latest release Docker stubs
-        if: ${{ inputs.release_type != 'Dry Run' }}
         uses: bitwarden/gh-actions/download-artifacts@main
         with:
           workflow: build.yml
@@ -164,21 +136,7 @@ jobs:
             docker-stub-EU-sha256.txt,
             swagger.json"
 
-      - name: Dry Run - Download latest release Docker stubs
-        if: ${{ inputs.release_type == 'Dry Run' }}
-        uses: bitwarden/gh-actions/download-artifacts@main
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: main
-          artifacts: "docker-stub-US.zip,
-            docker-stub-US-sha256.txt,
-            docker-stub-EU.zip,
-            docker-stub-EU-sha256.txt,
-            swagger.json"
-
       - name: Create release
-        if: ${{ inputs.release_type != 'Dry Run' }}
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           artifacts: "docker-stub-US.zip,
