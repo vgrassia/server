@@ -187,6 +187,11 @@ jobs:
             RC_COMMIT=$(git log --reverse --pretty=format:"%H" --max-count=1 Directory.Build.props)
             echo "rc_commit=$RC_COMMIT" >> $GITHUB_OUTPUT
           fi
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Github Actions"
 
       - name: Perform cherry-pick(s)
         env:
