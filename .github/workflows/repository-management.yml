@@ -142,14 +142,6 @@ jobs:
       - name: Push changes
         run: git push
 
-      - name: Generate GH App token
-        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
-        id: app-token
-        with:
-          app-id: ${{ secrets.BW_GHAPP_ID }}
-          private-key: ${{ secrets.BW_GHAPP_KEY }}
-          owner: ${{ github.repository_owner }}
-
 
   cherry_pick:
     name: Cherry-Pick Commit(s)
