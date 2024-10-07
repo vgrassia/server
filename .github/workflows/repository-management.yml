@@ -131,8 +131,13 @@ jobs:
             echo "version=${{ steps.calculate-next-version.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Configure Git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Github Actions"
+
       - name: Commit files
-        run: git commit -m "Bumped version to ${{ steps.set-final-version-output.outputs.version }}"
+        run: git commit -m "Bumped version to ${{ steps.set-final-version-output.outputs.version }}" -a
 
       - name: Push changes
         run: git push
