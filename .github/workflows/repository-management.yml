@@ -207,12 +207,12 @@ jobs:
 
               # Chery-pick from 'rc' into 'hotfix-rc'
               git switch hotfix-rc
-              git cherry-pick --strategy=ours -x $RC_COMMIT
+              git cherry-pick --strategy=theirs -x $RC_COMMIT
               git push -u origin hotfix-rc
 
               # Cherry-pick from 'main' into 'rc'
               git switch rc
-              git cherry-pick --strategy=ours -x $MAIN_COMMIT
+              git cherry-pick --strategy=theirs -x $MAIN_COMMIT
               git push -u origin rc
 
             # If the 'rc' branch does not exist:
@@ -220,7 +220,7 @@ jobs:
 
               # Cherry-pick from 'main' into 'hotfix-rc'
               git switch hotfix-rc
-              git cherry-pick --strategy=ours -x $MAIN_COMMIT
+              git cherry-pick --strategy=theirs -x $MAIN_COMMIT
               git push -u origin hotfix-rc
 
             fi
@@ -230,7 +230,7 @@ jobs:
 
             # Cherry-pick from 'main' into 'rc'
             git switch rc
-            git cherry-pick --strategy=ours -x $MAIN_COMMIT
+            git cherry-pick --strategy=theirs -x $MAIN_COMMIT
             git push -u origin rc
 
           fi
