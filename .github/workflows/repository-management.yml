@@ -132,7 +132,7 @@ jobs:
           fi
 
       - name: Commit files
-        run: git commit -m "Bumped version to ${{ steps.set-final-version-output.outputs.version }}" -a
+        run: git commit -m "Bumped version to ${{ steps.set-final-version-output.outputs.version }}"
 
       - name: Push changes
         run: git push
