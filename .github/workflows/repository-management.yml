@@ -207,7 +207,7 @@ jobs:
 
               # Chery-pick from 'rc' into 'hotfix-rc'
               git switch hotfix-rc
-              git cherry-pick --strategy-option=theirs -x $RC_COMMIT
+              git cherry-pick --allow-empty --strategy-option=theirs -x $RC_COMMIT
               git push -u origin hotfix-rc
 
               # Cherry-pick from 'main' into 'rc'
