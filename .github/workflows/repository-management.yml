@@ -236,8 +236,8 @@ jobs:
           fi
 
 
-  move_future_db_scripts:
-    name: Move finalization database scripts
-    needs: cherry_pick
-    uses: ./.github/workflows/_move_finalization_db_scripts.yml
-    secrets: inherit
+  # move_future_db_scripts:
+  #   name: Move finalization database scripts
+  #   needs: cherry_pick
+  #   uses: ./.github/workflows/_move_finalization_db_scripts.yml
+  #   secrets: inherit
